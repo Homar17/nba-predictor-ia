@@ -1,0 +1,8 @@
+env_nba/
+venv/
+__pycache__/
+*.pyc
+data/raw/*.csv
+data/processed/*.csv
+models/*.keras
+models/*.pkl
