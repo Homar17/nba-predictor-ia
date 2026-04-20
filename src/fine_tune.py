@@ -72,11 +72,19 @@ def main():
     
     # 4. Evaluar y guardar
     loss, accuracy = model.evaluate(X_test_scaled, y_test, verbose=0)
+    final_accuracy = round(accuracy * 100, 2)
+    
     print(f"\n--- Resultados del Ajuste Fino ---")
-    print(f"Nueva precision del modelo: {accuracy * 100:.2f}%")
+    print(f"Nueva precision del modelo: {final_accuracy}%")
     
     model.save(model_path)
     print("Modelo actualizado guardado exitosamente.")
+    
+    # 5. Guardar la precision para la interfaz grafica
+    accuracy_file = os.path.join("models", "accuracy.txt")
+    with open(accuracy_file, "w") as f:
+        f.write(str(final_accuracy))
+    print("Porcentaje de precision exportado para el panel de control.")
 
 if __name__ == "__main__":
     main()

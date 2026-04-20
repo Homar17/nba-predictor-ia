@@ -80,22 +80,26 @@ def predict_game(model, scaler, df_processed, df_averages, home_abbr, home_name,
     feature_cols = ['H2H_WIN_PCT_HOME', 'ROAD_STREAK_HOME', 'ROAD_STREAK_AWAY', 'REST_ADVANTAGE', 'PTS_ADVANTAGE', 'PLUS_MINUS_ADVANTAGE', 'WIN_ADVANTAGE', 'FG_PCT_ADVANTAGE', 'FG3_PCT_ADVANTAGE', 'REB_ADVANTAGE', 'AST_ADVANTAGE', 'TOV_ADVANTAGE']
     
     features_scaled = scaler.transform(pd.DataFrame([features_dict], columns=feature_cols))
-    base_prob_home = model.predict(features_scaled, verbose=0)[0][0]
+    
+    # CORRECCION: Forzamos la salida de TensorFlow a ser un float nativo de Python
+    base_prob_home = float(model.predict(features_scaled, verbose=0)[0][0])
     
     home_ppg, home_out, home_inj_list = calculate_injury_impact(home_name, df_averages)
     away_ppg, away_out, away_inj_list = calculate_injury_impact(away_name, df_averages)
     
     penalty_factor = 0.005
-    adjusted_prob_home = max(0.01, min(0.99, base_prob_home - (home_ppg * penalty_factor) + (away_ppg * penalty_factor)))
-    adjusted_prob_away = 1.0 - adjusted_prob_home
+    
+    # CORRECCION: Forzamos el calculo final ajustado a float nativo para evitar arrastrar tipos extraños
+    adjusted_prob_home = float(max(0.01, min(0.99, base_prob_home - (home_ppg * penalty_factor) + (away_ppg * penalty_factor))))
+    adjusted_prob_away = float(1.0 - adjusted_prob_home)
     
     return {
         "home_team": home_abbr,
         "home_name": home_name,
         "away_team": away_abbr,
         "away_name": away_name,
-        "home_prob": round(adjusted_prob_home * 100, 2),
-        "away_prob": round(adjusted_prob_away * 100, 2),
+        "home_prob": float(round(adjusted_prob_home * 100, 2)),
+        "away_prob": float(round(adjusted_prob_away * 100, 2)),
         "home_injuries": home_inj_list,
         "away_injuries": away_inj_list,
         "predicted_winner": home_name if adjusted_prob_home > 0.5 else away_name
